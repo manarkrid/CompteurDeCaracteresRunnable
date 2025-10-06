@@ -2,54 +2,51 @@ package compteurcarac;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class MainAvecExecutor {
 
-    public static final int MAX_THREADS_SIMULT = 3;
+    public static final int MAX_THREADS_SIMULT = 10; 
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        // La liste des tâches à exécuter (chaque tâche est un Callable)
+        // 1️ Liste des tâches (Callable)
+        List<CompteurDeCaracteresCallable> taches = List.of(
+                new CompteurDeCaracteresCallable("http://www.univ-jfc.fr"),
+                new CompteurDeCaracteresCallable("https://www.irit.fr/"),
+                new CompteurDeCaracteresCallable("http://www.google.fr"),
+                new CompteurDeCaracteresCallable("https://www.netflix.com/browse"),
+                new CompteurDeCaracteresCallable("https://nodejs.org/fr")
+        );
 
-        // TODO : décommenter lorsque la classe CompteurDeCaracteresCallable est prête
-        // List<CompteurDeCaracteresCallable> taches = List.of(
-        // new CompteurDeCaracteresCallable("http://www.univ-jfc.fr"),
-        // new CompteurDeCaracteresCallable("https://www.irit.fr/"),
-        // new CompteurDeCaracteresCallable("http://www.google.fr"),
-        // new CompteurDeCaracteresCallable("https://www.netflix.com/browse"),
-        // new CompteurDeCaracteresCallable("https://nodejs.org/fr"));
-
-        // TODO : Création d’un pool de threads fixe (ExecutorService). Utiliser
-        // la classe Executors et la variable MAX_THREADS_SIMULT.
-        // Tip : choisir la bonne méthode statique parmi celles qui sont fournies par
-        // Executors
+        // 2️ Création du pool de threads
+        ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS_SIMULT);
 
         try {
             Instant start = Instant.now();
             long totalCaracteres = 0;
             Duration sommeDesTemps = Duration.ZERO;
 
-            // TODO : Soumission des tâches au pool avec "invokeAll"
-            // l'invocation est bloquante et renvoie une liste de Futures qu'il faut
-            // conserver dans une variable locale pour les ré-utiliser plus tard
-            // List<Future<xxx>> resultatsFuturs = ...;
+            // 3️ Soumission des tâches au pool (bloquant)
+            List<Future<ResultatDuCompte>> resultatsFuturs = executor.invokeAll(taches);
 
-            // TODO : récupérer le résultat de chaque future avec get() (bloquant) et
-            // exploiter-le. Pour cela utiliser une boucle for
-            // for (Future<xxx> futur : resultatsFuturs) {
-            // // Récupération des résultats via Future.get()
-            // // ResultatDuCompte resultat = ...;
-            // // etc.
-            // }
+            // 4️ Récupération des résultats
+            for (Future<ResultatDuCompte> futur : resultatsFuturs) {
+                ResultatDuCompte resultat = futur.get(); // get() est bloquant si le calcul n'est pas fini
+                totalCaracteres += resultat.nombreDeCaracteres;
+                sommeDesTemps = sommeDesTemps.plus(resultat.tempsDeCalcul);
+            }
 
-            System.out.printf("Nombre total d'octets : %d %n", totalCaracteres);
+            // 5️ Affichage des résultats globaux
+            System.out.printf("Nombre total de caractères : %d %n", totalCaracteres);
             System.out.printf("Temps effectif de calcul ~ %d secondes %n",
                     Duration.between(start, Instant.now()).toSeconds());
             System.out.printf("Somme des temps individuels ~ %d secondes %n",
                     sommeDesTemps.toSeconds());
 
         } finally {
-            // TODO : Fermeture du pool
+            // 6️ Fermeture du pool
+            executor.shutdown();
         }
     }
 }
