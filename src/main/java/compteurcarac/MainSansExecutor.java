@@ -8,7 +8,7 @@ import java.util.List;
 public class MainSansExecutor {
 
     public static void main(String[] args) throws InterruptedException {
-        // 1️⃣ Liste des tâches (les URLs à analyser)
+        // 1️ Liste des tâches (les URLs à analyser)
         List<CompteurDeCaracteresRunnable> taches = List.of(
                 new CompteurDeCaracteresRunnable("http://www.univ-jfc.fr"),
                 new CompteurDeCaracteresRunnable("https://www.irit.fr/"),
@@ -20,22 +20,22 @@ public class MainSansExecutor {
         // Pour stocker les threads créés
         List<Thread> threads = new ArrayList<>();
 
-        // 2️⃣ Mesure du temps global
+        // 2️ Mesure du temps global
         Instant start = Instant.now();
 
-        // 3️⃣ Créer et démarrer un Thread pour chaque tâche
+        // 3️ Créer et démarrer un Thread pour chaque tâche
         for (CompteurDeCaracteresRunnable tache : taches) {
             Thread t = new Thread(tache);
             threads.add(t);
             t.start();
         }
 
-        // 4️⃣ Attendre la fin de tous les threads (join)
+        // 4️ Attendre la fin de tous les threads (join)
         for (Thread t : threads) {
             t.join();
         }
 
-        // 5️⃣ Récupérer les résultats de chaque tâche
+        // 5 Récupérer les résultats de chaque tâche
         int totalCaracteres = 0;
         Duration sommeDesTemps = Duration.ZERO;
 
@@ -47,13 +47,13 @@ public class MainSansExecutor {
             }
         }
 
-        // 6️⃣ Afficher les résultats globaux
-        System.out.printf("📊 Nombre total de caractères : %d %n", totalCaracteres);
-        System.out.printf("⏱️ Temps effectif global ~ %d secondes %n",
+        // 6️ Afficher les résultats globaux
+        System.out.printf(" Nombre total de caractères : %d %n", totalCaracteres);
+        System.out.printf(" Temps effectif global ~ %d secondes %n",
                 Duration.between(start, Instant.now()).toSeconds());
-        System.out.printf("🧮 Somme des temps individuels ~ %d secondes %n",
+        System.out.printf("Somme des temps individuels ~ %d secondes %n",
                 sommeDesTemps.toSeconds());
 
-        System.out.println("\n✅ Remarque : le temps global est plus petit que la somme des temps individuels grâce à l’exécution concurrente !");
+        System.out.println("\n Remarque : le temps global est plus petit que la somme des temps individuels grâce à l’exécution concurrente !");
     }
 }
